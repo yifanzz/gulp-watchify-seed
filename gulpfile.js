@@ -3,6 +3,7 @@ var nodemon = require('gulp-nodemon')
 var livereload = require('gulp-livereload')
 var watchify = require('gulp-watchify')
 var plumber = require('gulp-plumber')
+var mocha = require('gulp-mocha')
 
 var paths = {
   scripts: [
@@ -13,11 +14,14 @@ var paths = {
   ],
   css: [
     'public/css/*.css'
+  ],
+  tests: [
+    'test/**/*.js'
   ]
 }
 
 gulp.task('browserify', watchify(function (watchify) {
-  return gulp.src(paths.scripts)
+  gulp.src(paths.scripts)
     .pipe(plumber())
     .pipe(watchify({watch: true}))
     .pipe(gulp.dest('public/lib'))
@@ -25,7 +29,7 @@ gulp.task('browserify', watchify(function (watchify) {
 }))
 
 gulp.task('process-html', function() {
-  return gulp.src(paths.html)
+  gulp.src(paths.html)
     .pipe(livereload())
 })
 
@@ -33,16 +37,29 @@ gulp.task('serve', function () {
   nodemon({ script: 'web.js'})
 })
 
+gulp.task('test', function () {
+  gulp.src(paths.tests)
+    .pipe(mocha({reporter: 'spec'}))
+})
+
 gulp.task('watch', function () {
-  gulp.watch(paths.scripts, ['browserify']).on('change', notifyLivereloadServer(livereload()))
-  gulp.watch(paths.css).on('change', notifyLivereloadServer(livereload()))
+  gulp.watch(paths.scripts, ['browserify'])
+    .on('change', notifyLivereloadServer)
+
+  gulp.watch(paths.css)
+    .on('change', notifyLivereloadServer)
+    
   gulp.watch(paths.html, ['process-html'])
 })
 
-gulp.task('default', ['browserify', 'serve', 'watch'])
+gulp.task('watch-test', function () {
+  gulp.watch(paths.tests, ['test'])
+})
 
-function notifyLivereloadServer(server) {
+gulp.task('default', ['test', 'browserify', 'serve', 'watch'])
+
+function notifyLivereloadServer() {
   return function (file) {
-    server.changed(file.path)
+    livereload().changed(file.path)
   }
 }

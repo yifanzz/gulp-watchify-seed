@@ -1,1 +1,3 @@
-console.log('this')
+module.exports.hello = function () {
+	return 'hello'
+}
