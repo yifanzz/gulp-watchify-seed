@@ -34,7 +34,7 @@ gulp.task('process-html', function() {
 })
 
 gulp.task('serve', function () {
-  nodemon({ script: 'web.js'})
+  nodemon({ script: 'server/web.js'})
 })
 
 gulp.task('watch', function () {
