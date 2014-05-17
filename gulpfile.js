@@ -20,7 +20,7 @@ var paths = {
   ]
 }
 
-gulp.task('browserify', watchify(function (watchify) {
+gulp.task('watchify', watchify(function (watchify) {
   gulp.src(paths.scripts)
     .pipe(plumber())
     .pipe(watchify({watch: true}))
@@ -37,29 +37,34 @@ gulp.task('serve', function () {
   nodemon({ script: 'web.js'})
 })
 
-gulp.task('test', function () {
-  gulp.src(paths.tests)
-    .pipe(mocha({reporter: 'spec'}))
-})
-
 gulp.task('watch', function () {
-  gulp.watch(paths.scripts, ['browserify'])
-    .on('change', notifyLivereloadServer)
+  gulp.watch(paths.css).on('change', notifyLivereloadServer)
 
-  gulp.watch(paths.css)
-    .on('change', notifyLivereloadServer)
-    
   gulp.watch(paths.html, ['process-html'])
 })
 
-gulp.task('watch-test', function () {
-  gulp.watch(paths.tests, ['test'])
+
+gulp.task('test', function () {
+  runTests(paths.tests)
 })
 
-gulp.task('default', ['test', 'browserify', 'serve', 'watch'])
+gulp.task('watch-test', function () {
+  gulp.watch(paths.tests).on('change', runTestForChangedFile)
+  gulp.watch(paths.scripts, ['test'])
+})
 
-function notifyLivereloadServer() {
-  return function (file) {
-    livereload().changed(file.path)
-  }
+gulp.task('default', ['test', 'watchify', 'serve', 'watch'])
+
+function notifyLivereloadServer(file) {
+  livereload().changed(file.path)
+}
+
+function runTestForChangedFile(file) {
+  runTests([file.path])
+}
+
+function runTests(tests) {
+  gulp.src(tests)
+    .pipe(plumber())
+    .pipe(mocha({reporter: 'spec'}))
 }
