@@ -29,6 +29,7 @@ gulp.task('watchify', watchify(function (watchify) {
 }))
 
 gulp.task('process-html', function() {
+  console.log('notified live reload server')
   gulp.src(paths.html)
     .pipe(livereload())
 })
@@ -38,8 +39,8 @@ gulp.task('serve', function () {
 })
 
 gulp.task('watch', function () {
+  livereload.listen()
   gulp.watch(paths.css).on('change', notifyLivereloadServer)
-
   gulp.watch(paths.html, ['process-html'])
 })
 
